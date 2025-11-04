@@ -1,0 +1,67 @@
+:root{
+  --bg: #0f1226;
+  --card: #161a36;
+  --muted: #8ea3b0;
+  --text: #eef3f8;
+  --brand: #6ee7ff;
+  --brand-2: #7c4dff;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(180deg, #0b0e22, #0f1226);
+  margin:0; padding:0; color:var(--text);
+}
+.wrap{max-width: 980px; margin: 32px auto; padding: 24px}
+header{display:flex; gap:14px; margin-bottom: 18px}
+.logo{
+  width:46px; height:46px; border-radius:14px;
+  display:grid; place-items:center;
+  background: conic-gradient(from 200deg, var(--brand), var(--brand-2));
+  box-shadow: var(--shadow);
+  font-weight:900; color:#0b0e22
+}
+h1{margin:0}
+.sub{color:var(--muted); font-size:.9rem}
+.grid{display:grid; grid-template-columns: 1.2fr .8fr; gap: 20px}
+@media (max-width: 860px){ .grid{grid-template-columns:1fr} }
+.card{
+  background: var(--card);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: var(--shadow)
+}
+.field label{font-weight:bold; font-size:.9rem; color:var(--muted)}
+.input{
+  background:#0c1030; border:1px solid rgba(255,255,255,.12);
+  border-radius: 12px; color:var(--text);
+  padding: 10px; width:100%;
+}
+.toggle{
+  display:flex; gap:8px; background:#0c1030;
+  border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:4px
+}
+.toggle button{
+  flex:1; background:transparent; border:none;
+  color:var(--muted); padding:10px; border-radius:10px; cursor:pointer
+}
+.toggle button.active{background: var(--brand); color:#000}
+.cta{
+  width:100%; padding: 14px;
+  font-weight:800; border:none; border-radius: 12px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-2));
+  cursor:pointer
+}
+.kpis{display:grid; grid-template-columns: repeat(3,1fr); gap:12px; margin-top:12px}
+.kpi{background:#0c1030; border-radius:12px; padding:12px; text-align:center}
+.label{color:var(--muted); font-size:.82rem}
+.val{font-size:1.1rem; font-weight:800}
+.pill{padding:6px 10px; border-radius:999px; background:var(--brand); color:#000; font-weight:700; font-size:.82rem}
+.note{color:var(--muted); font-size:.86rem; margin-top:8px}
+table{width:100%; border-collapse:collapse; margin-top:10px}
+th, td{padding:10px; border-bottom:1px solid rgba(255,255,255,.06)}
+th{color:var(--muted); background: rgba(255,255,255,.03)}
+tfoot td{font-weight:bold}
+.footer{margin-top:18px; color:var(--muted); font-size:.85rem; display:flex; justify-content:space-between}
+.link{color:var(--brand); text-decoration:none}

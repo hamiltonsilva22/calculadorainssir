@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora INSS & IRRF 2025</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script>
+  if(sessionStorage.getItem("logado") !== "true"){
+    window.location.href = "login.html";
+  }
+</script>
+
+<div class="wrap">
+  <header>
+    <div class="logo">R$</div>
+    <div>
+      <h1>Calculadora INSS & IRRF — 2025</h1>
+      <div class="sub">Tabelas atualizadas (INSS — jan/2025; IRRF e desconto simplificado R$ 607,20).</div>
+    </div>
+
+    <!-- BOTÃO SAIR -->
+    <button onclick="sair()" 
+      style="margin-left:auto;padding:8px 14px;border:none;border-radius:8px;background:#ff4e4e;color:white;cursor:pointer;font-weight:bold">
+      Sair
+    </button>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Entrada de dados</h2>
+      <div class="row">
+        <div class="field">
+          <label>Salário bruto (R$)</label>
+          <input id="salario" class="input" inputmode="decimal" placeholder="Ex.: 3500,00" />
+        </div>
+        <div class="field">
+          <label>Dependentes (IRRF)</label>
+          <input id="dependentes" class="input" type="number" min="0" step="1" value="0" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Pensão alimentícia (R$) — dedução legal</label>
+          <input id="pensao" class="input" inputmode="decimal" placeholder="Ex.: 0,00" />
+        </div>
+        <div class="field">
+          <label>Modo do IRRF</label>
+          <div class="toggle">
+            <button id="modo-auto" class="active" data-mode="auto">Automático</button>
+            <button id="modo-legal" data-mode="legal">Dedução legal</button>
+            <button id="modo-simplificado" data-mode="simplificado">Desconto simplificado</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="cta" id="btn-calcular">Calcular</button>
+      <div class="note">INSS calculado de forma progressiva até o teto. "Automático" aplica o método mais vantajoso.</div>
+    </section>
+
+    <section class="card">
+      <h2>Resumo</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="label">INSS</div><div id="kpi-inss" class="val">—</div></div>
+        <div class="kpi"><div class="label">IRRF</div><div id="kpi-irrf" class="val">—</div></div>
+        <div class="kpi"><div class="label">Líquido</div><div id="kpi-liquido" class="val">—</div></div>
+      </div>
+      <div class="right">
+        <span class="pill" id="badge-modo">Modo: —</span>
+      </div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Detalhamento</h2>
+    <h3>INSS — faixas</h3>
+    <div id="tbl-inss"></div>
+    <h3>IRRF</h3>
+    <div id="tbl-irrf"></div>
+  </section>
+
+  <div class="footer">
+    <div>Feito no VS Code • Tema dark</div>
+    <div><a class="link" href="#" id="btn-compartilhar">Compartilhar valores (URL)</a></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+<!-- SCRIPT LOGOUT -->
+<script>
+  function sair() {
+    sessionStorage.removeItem("logado");
+    window.location.href = "login.html";
+  }
+</script>
+
+</body>
+</html>

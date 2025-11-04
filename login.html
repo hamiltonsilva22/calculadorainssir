@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login - Calculadora INSS & IRRF 2025</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">🔒</div>
+      <div>
+        <h1>Login</h1>
+        <div class="sub">Entre para acessar a calculadora</div>
+      </div>
+    </header>
+
+    <section class="card" style="max-width:400px;margin:auto">
+      <div class="field">
+        <label>Usuário</label>
+        <input id="usuario" class="input" type="text" placeholder="Digite seu usuário">
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Senha</label>
+        <input id="senha" class="input" type="password" placeholder="Digite sua senha">
+      </div>
+
+      <button class="cta" style="margin-top:15px" onclick="fazerLogin()">Entrar</button>
+      <button class="cta" style="margin-top:10px;background:#7c4dff" onclick="cadastrarUsuario()">Cadastrar</button>
+
+      <div id="msgErro" class="note" style="color:red;margin-top:8px"></div>
+      <div id="msgOk" class="note" style="color:lightgreen;margin-top:5px"></div>
+    </section>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>
