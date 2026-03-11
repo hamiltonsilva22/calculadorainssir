@@ -36,25 +36,50 @@ const DESC_SIMPLIFICADO = 607.20;
 
 // Funções de cálculo
 function calcularINSSProgressivo(salBruto){
-  let restante = salBruto, baseAnterior = 0, contribuicao = 0;
-  const linhas = [];
-  for(const f of INSS_FAIXAS){
-    const faixaBase = Math.max(0, Math.min(restante, f.lim - baseAnterior));
-    const valorFaixa = faixaBase * f.aliq;
-    if(faixaBase > 0){
-      linhas.push({ base: faixaBase, aliq: f.aliq, valor: valorFaixa });
-    }
-    contribuicao += valorFaixa;
-    restante -= faixaBase;
-    baseAnterior = f.lim;
-    if(restante <= 0) break;
-  }
-  contribuicao = Math.min(contribuicao, INSS_TETO);
-  return { inss: Math.floor(contribuicao * 100) / 100, linhas };
-}
 
-function faixaIRRF(base){
-  return IRRF_FAIXAS.find(f => base <= f.ate);
+  let aliq = 0;
+  let ded = 0;
+
+  if (salBruto <= 1621.00) {
+    aliq = 0.075;
+    ded = 0;
+  }
+  else if (salBruto <= 2902.84) {
+    aliq = 0.09;
+    ded = 24.32;
+  }
+  else if (salBruto <= 4354.27) {
+    aliq = 0.12;
+    ded = 111.42;
+  }
+  else if (salBruto <= 8475.55) {
+    aliq = 0.14;
+    ded = 198.50;
+  }
+  else {
+    return {
+      inss: INSS_TETO,
+      linhas: [{
+        base: salBruto,
+        aliq: 0.14,
+        valor: INSS_TETO
+      }]
+    };
+  }
+
+  let valor = (salBruto * aliq) - ded;
+
+  // truncamento na segunda casa
+  valor = Math.floor(valor * 100) / 100;
+
+  return {
+    inss: valor,
+    linhas: [{
+      base: salBruto,
+      aliq: aliq,
+      valor: valor
+    }]
+  };
 }
 function calcularIRRF_DeducaoLegal(salBruto, inss, dependentes, pensao){
   const base = Math.max(0, salBruto - inss - dependentes*DEP_VAL - pensao);
