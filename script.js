@@ -126,15 +126,54 @@ function modoAtual(){
 
 // Render tabelas
 function renderTabelaINSS(linhas, total){
-  if(!linhas.length){ tblINSS.innerHTML = '<div class="note">Sem base para INSS.</div>'; return; }
+
+  if(!linhas.length){
+    tblINSS.innerHTML = '<div class="note">Sem base para INSS.</div>';
+    return;
+  }
+
+  const limites = [1621.00, 2902.84, 4354.27, 8475.55];
+
   tblINSS.innerHTML = `
     <table>
-      <thead><tr><th>Faixa</th><th>Base</th><th>Alíquota</th><th>Valor</th></tr></thead>
+      <thead>
+        <tr>
+          <th>Faixa</th>
+          <th>Base</th>
+          <th>Alíquota</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
       <tbody>
-        ${linhas.map(l => `<tr><td>Até faixa</td><td>${br.money(l.base)}</td><td>${br.pct(l.aliq)}</td><td>${br.money(l.valor)}</td></tr>`).join('')}
+        ${linhas.map((l,i) => {
+
+          let faixaTexto;
+
+          if(i === 0){
+            faixaTexto = `Até ${br.money(limites[i])}`;
+          }else{
+            faixaTexto = `${br.money(limites[i-1])} até ${br.money(limites[i])}`;
+          }
+
+          return `
+            <tr>
+              <td>${faixaTexto}</td>
+              <td>${br.money(l.base)}</td>
+              <td>${br.pct(l.aliq)}</td>
+              <td>${br.money(l.valor)}</td>
+            </tr>
+          `
+        }).join('')}
       </tbody>
-      <tfoot><tr><td colspan="3">Total</td><td>${br.money(total)}</td></tr></tfoot>
-    </table>`;
+      <tfoot>
+        <tr>
+          <td colspan="3">Total</td>
+          <td>${br.money(total)}</td>
+        </tr>
+      </tfoot>
+    </table>
+  `;
+}
 }
 function renderTabelaIRRF(modo, det, redutor, irFinal) {
   const { base, ir, aliq, ded } = det; // 'ir' is the pre-reducer calculated IR
