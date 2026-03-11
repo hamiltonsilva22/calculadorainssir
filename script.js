@@ -18,12 +18,7 @@ const br = {
 
 // Constantes 2026
 const INSS_TETO = 988.07;
-const INSS_FAIXAS = [
-  { lim: 1621.00, aliq: 0.075 },
-  { lim: 2902.84, aliq: 0.09 },
-  { lim: 4354.27, aliq: 0.12 },
-  { lim: 8475.55, aliq: 0.14 }
-];
+
 const IRRF_FAIXAS = [
   { ate: 2428.80, aliq: 0.00, ded: 0.00 },
   { ate: 2826.65, aliq: 0.075, ded: 182.16 },
@@ -31,10 +26,19 @@ const IRRF_FAIXAS = [
   { ate: 4664.68, aliq: 0.225, ded: 675.49 },
   { ate: Infinity, aliq: 0.275, ded: 908.73 }
 ];
+
 const DEP_VAL = 189.59;
 const DESC_SIMPLIFICADO = 607.20;
 
-// Funções de cálculo
+// Função que encontra a faixa IRRF
+function faixaIRRF(base){
+  return IRRF_FAIXAS.find(f => base <= f.ate);
+}
+
+// ======================
+// CÁLCULO INSS
+// ======================
+
 function calcularINSSProgressivo(salBruto){
 
   let aliq = 0;
@@ -69,7 +73,6 @@ function calcularINSSProgressivo(salBruto){
 
   let valor = (salBruto * aliq) - ded;
 
-  // truncamento na segunda casa
   valor = Math.floor(valor * 100) / 100;
 
   return {
@@ -81,54 +84,110 @@ function calcularINSSProgressivo(salBruto){
     }]
   };
 }
+
+// ======================
+// CÁLCULO IRRF
+// ======================
+
 function calcularIRRF_DeducaoLegal(salBruto, inss, dependentes, pensao){
+
   const base = Math.max(0, salBruto - inss - dependentes*DEP_VAL - pensao);
+
   const f = faixaIRRF(base);
-  return { base, ir: Math.max(0, base * f.aliq - f.ded), aliq: f.aliq, ded: f.ded };
-}
-function calcularIRRF_Simplificado(salBruto){
-  const base = Math.max(0, salBruto - DESC_SIMPLIFICADO);
-  const f = faixaIRRF(base);
-  return { base, ir: Math.max(0, base * f.aliq - f.ded), aliq: f.aliq, ded: f.ded };
+
+  return {
+    base,
+    ir: Math.max(0, base * f.aliq - f.ded),
+    aliq: f.aliq,
+    ded: f.ded
+  };
 }
 
+function calcularIRRF_Simplificado(salBruto){
+
+  const base = Math.max(0, salBruto - DESC_SIMPLIFICADO);
+
+  const f = faixaIRRF(base);
+
+  return {
+    base,
+    ir: Math.max(0, base * f.aliq - f.ded),
+    aliq: f.aliq,
+    ded: f.ded
+  };
+}
+
+// ======================
+// REDUTOR IRRF
+// ======================
+
 function aplicarRedutorIRRF(irCalculado, salarioBruto) {
+
   if (salarioBruto <= 5000.00) {
-    // For gross income up to 5000, IR is zeroed out. The reduction is the calculated IR itself.
     return { irFinal: 0, redutor: irCalculado };
   }
-  if (salarioBruto <= 7350.00) { // 5000.01 to 7350.00
+
+  if (salarioBruto <= 7350.00) {
+
     const redutor = 978.62 - (0.133145 * salarioBruto);
+
     const irFinal = Math.max(0, irCalculado - redutor);
+
     return { irFinal, redutor };
   }
-  // Above 7350, no reducer.
+
   return { irFinal: irCalculado, redutor: 0 };
 }
 
-// Elementos
-const el = id => document.getElementById(id);
-const kInss = el('kpi-inss'), kIrrf = el('kpi-irrf'), kLiq = el('kpi-liquido'), badgeModo = el('badge-modo');
-const tblINSS = el('tbl-inss'), tblIRRF = el('tbl-irrf');
+// ======================
+// ELEMENTOS
+// ======================
 
-// Toggle modo
+const el = id => document.getElementById(id);
+
+const kInss = el('kpi-inss');
+const kIrrf = el('kpi-irrf');
+const kLiq = el('kpi-liquido');
+const badgeModo = el('badge-modo');
+
+const tblINSS = el('tbl-inss');
+const tblIRRF = el('tbl-irrf');
+
+// ======================
+// TOGGLE MODO
+// ======================
+
 ['modo-auto','modo-legal','modo-simplificado'].forEach(id => {
-  document.getElementById(id).addEventListener('click', () => {
-    ['modo-auto','modo-legal','modo-simplificado'].forEach(m => el(m).classList.remove('active'));
+
+  el(id).addEventListener('click', () => {
+
+    ['modo-auto','modo-legal','modo-simplificado']
+      .forEach(m => el(m).classList.remove('active'));
+
     el(id).classList.add('active');
   });
+
 });
+
 function modoAtual(){
+
   if(el('modo-legal').classList.contains('active')) return 'legal';
+
   if(el('modo-simplificado').classList.contains('active')) return 'simplificado';
+
   return 'auto';
 }
 
-// Render tabelas
+// ======================
+// TABELA INSS
+// ======================
+
 function renderTabelaINSS(linhas, total){
 
   if(!linhas.length){
+
     tblINSS.innerHTML = '<div class="note">Sem base para INSS.</div>';
+
     return;
   }
 
@@ -144,108 +203,197 @@ function renderTabelaINSS(linhas, total){
           <th>Valor</th>
         </tr>
       </thead>
+
       <tbody>
-        ${linhas.map((l,i) => {
 
-          let faixaTexto;
+        ${linhas.map((l,i)=>{
 
-          if(i === 0){
-            faixaTexto = `Até ${br.money(limites[i])}`;
+          let faixa;
+
+          if(i===0){
+
+            faixa = `Até ${br.money(limites[i])}`;
+
           }else{
-            faixaTexto = `${br.money(limites[i-1])} até ${br.money(limites[i])}`;
+
+            faixa = `${br.money(limites[i-1])} até ${br.money(limites[i])}`;
           }
 
           return `
             <tr>
-              <td>${faixaTexto}</td>
+              <td>${faixa}</td>
               <td>${br.money(l.base)}</td>
               <td>${br.pct(l.aliq)}</td>
               <td>${br.money(l.valor)}</td>
             </tr>
           `
+
         }).join('')}
+
       </tbody>
+
       <tfoot>
+
         <tr>
+
           <td colspan="3">Total</td>
+
           <td>${br.money(total)}</td>
+
         </tr>
+
       </tfoot>
+
     </table>
   `;
 }
-}
-function renderTabelaIRRF(modo, det, redutor, irFinal) {
-  const { base, ir, aliq, ded } = det; // 'ir' is the pre-reducer calculated IR
+
+// ======================
+// TABELA IRRF
+// ======================
+
+function renderTabelaIRRF(modo, det, redutor, irFinal){
+
+  const { base, ir, aliq, ded } = det;
+
   const irBruto = ir;
+
   const hasRedutor = redutor > 0 || (irBruto > 0 && irFinal === 0);
 
   let redutorRow = '';
-  if (hasRedutor) {
+
+  if(hasRedutor){
+
     redutorRow = `
       <tr>
-        <td colspan="3" style="text-align: right;">Redutor IRRF</td>
+        <td colspan="3" style="text-align:right;">Redutor IRRF</td>
         <td>-${br.money(redutor)}</td>
       </tr>
     `;
   }
 
   tblIRRF.innerHTML = `
+
     <table>
+
       <thead>
+
         <tr>
+
           <th>Base</th>
+
           <th>Alíquota</th>
+
           <th>Dedução</th>
+
           <th>IR Bruto</th>
+
         </tr>
+
       </thead>
+
       <tbody>
+
         <tr>
+
           <td>${br.money(base)}</td>
+
           <td>${br.pct(aliq)}</td>
+
           <td>${br.money(ded)}</td>
+
           <td>${br.money(irBruto)}</td>
+
         </tr>
+
         ${redutorRow}
+
       </tbody>
+
       <tfoot>
-        <tr><td colspan="3" style="text-align: right; font-weight: bold;">IRRF Final</td><td style="font-weight: bold;">${br.money(irFinal)}</td></tr>
-        <tr><td colspan="3">Modo</td><td>${modo}</td></tr>
+
+        <tr>
+
+          <td colspan="3" style="text-align:right;font-weight:bold;">IRRF Final</td>
+
+          <td style="font-weight:bold;">${br.money(irFinal)}</td>
+
+        </tr>
+
+        <tr>
+
+          <td colspan="3">Modo</td>
+
+          <td>${modo}</td>
+
+        </tr>
+
       </tfoot>
-    </table>`;
+
+    </table>
+  `;
 }
 
-// Cálculo principal
+// ======================
+// CÁLCULO PRINCIPAL
+// ======================
+
 function calcular(){
+
   const salario = br.toNumber(el('salario').value);
-  const dependentes = Math.max(0, parseInt(el('dependentes').value || '0', 10));
+
+  const dependentes = Math.max(0, parseInt(el('dependentes').value || '0'));
+
   const pensao = br.toNumber(el('pensao').value);
-  if(!salario || salario <= 0){ alert('Informe um salário válido'); return; }
+
+  if(!salario || salario <= 0){
+
+    alert('Informe um salário válido');
+
+    return;
+  }
 
   const { inss, linhas } = calcularINSSProgressivo(salario);
+
   const detLegal = calcularIRRF_DeducaoLegal(salario, inss, dependentes, pensao);
+
   const detSimpl = calcularIRRF_Simplificado(salario);
 
   let modo = modoAtual();
+
   let det = detLegal;
+
   if(modo === 'simplificado') det = detSimpl;
-  if(modo === 'auto') det = detLegal.ir <= detSimpl.ir ? detLegal : detSimpl;
+
+  if(modo === 'auto')
+    det = detLegal.ir <= detSimpl.ir ? detLegal : detSimpl;
 
   const irrfCalculado = det.ir;
+
   const { irFinal, redutor } = aplicarRedutorIRRF(irrfCalculado, salario);
 
   const irrf = irFinal;
+
   const liquido = salario - inss - irrf;
 
   kInss.textContent = br.money(inss);
   kIrrf.textContent = br.money(irrf);
   kLiq.textContent = br.money(liquido);
+
   badgeModo.textContent = `Modo: ${modo}`;
+
   renderTabelaINSS(linhas, inss);
+
   renderTabelaIRRF(modo, det, redutor, irrf);
 }
 
-// Eventos
+// ======================
+// EVENTOS
+// ======================
+
 el('btn-calcular').addEventListener('click', calcular);
-['salario','dependentes','pensao'].forEach(id => el(id).addEventListener('keydown', e => { if(e.key==='Enter') calcular(); }));
+
+['salario','dependentes','pensao']
+  .forEach(id => el(id).addEventListener('keydown', e => {
+    if(e.key === 'Enter') calcular();
+  }));
